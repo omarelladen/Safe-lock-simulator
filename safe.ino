@@ -16,10 +16,11 @@ const int8_t g_pw_master[4] = {1,2,3,4};
 int8_t g_pw_try[4];
 int8_t g_pw_try_index = 0;
 int8_t g_safe_is_locked = 0;
+int8_t g_sw1_pressed = 0;
 
 
 // Cofre aberto, digite nova senha
-// fechar: senha de 4 digitos + # -> esperar 1s, motor girar 2 voltas no sentido anti-horario no modo meio passo, Cofre fechando
+// fechar: senha de 4 digitos( + # -> esperar 1s, motor girar 2 voltas no sentido anti-horario no modo meio passo, Cofre fechando
 // Cofre fechado
 // senha previamente cadastrada digitada corretamente -> motor girar 2 voltas no sentido horário no modo passo completo, Cofre abrindo
 // Cofre aberto, digite nova senha
@@ -38,6 +39,7 @@ int8_t g_safe_is_locked = 0;
 void setup()
 {
     pinMode(PIN_LCD_LIGHT, INPUT);
+    pinMode(PIN_SHIELD_BTS, INPUT);
 
     pinMode(PIN_D3, INPUT_PULLUP);  // L1
 	pinMode(PIN_D2, INPUT_PULLUP);  // L2
@@ -60,7 +62,6 @@ void setup()
 
 void kb_hashtag_pressed()
 {
-
 	if (g_pw_try_index == 4)
 	{
 		g_pw_try_index = 0;
@@ -85,20 +86,19 @@ void kb_hashtag_pressed()
 					{
 						lock_safe();
 					}
-				}
-				
+				}				
 			}
 			else
 			{
 				if (pw_master_is_correct())
 				{
+					g_safe_is_locked = 0;
 					g_wrong_tries = 0;
 					open_safe();
 				}
 			}
 		}
 	}
-
 }
 
 void sw1_pressed()
@@ -136,15 +136,28 @@ void kb_num_pressed(int8_t num)
 {
 	if (g_pw_try_index < 4)
 	{
-		lcd.setCursor(15, 1);
-		lcd.print(num);
-		
-		lcd.setCursor(14, 1);
-		lcd.print(g_pw_try_index);
-		
-		
-		g_pw_try[g_pw_try_index] = num;
-		g_pw_try_index++;
+		if (!g_safe_is_locked)
+		{
+			lcd.setCursor(15, 1);
+			lcd.print(num);
+			
+			lcd.setCursor(14, 1);
+			lcd.print(g_pw_try_index);
+
+			g_pw_try[g_pw_try_index] = num;
+			g_pw_try_index++;
+		}
+		else if (g_sw1_pressed)
+		{
+			lcd.setCursor(15, 1);
+			lcd.print(num);
+			
+			lcd.setCursor(14, 1);
+			lcd.print(g_pw_try_index);
+
+			g_pw_try[g_pw_try_index] = num;
+			g_pw_try_index++;
+		}
 	}
 }
 
@@ -186,7 +199,7 @@ void close_safe()
 
 void lock_safe()
 {
-	g_safe_is_locked++;
+	g_safe_is_locked = 1;
 
 	lcd.clear();
 	lcd.setCursor(0, 0);
@@ -255,7 +268,6 @@ void check_kb_press()
 			delay(1);
 		}
 
-	    
 	    
 	    if (digitalRead(PIN_D3) == LOW)  // L1
 	    {
@@ -350,10 +362,6 @@ void handle_kb_press(const int8_t line, const int8_t col)
 	g_prev_kb_state = dig;
 }
 
-
-
-
-
 void bt_left()
 {
 }
@@ -374,18 +382,19 @@ void bt_select()
 {
 }
 
-void bt_released(int8_t bt)
+void bt_pressed(int8_t bt)
 {
-    if (bt == BT_DOWN)
-        bt_down();
-    else if (bt == BT_UP)
-        bt_up();
-    else if (bt == BT_SELECT)
-        bt_select();
-    else if (bt == BT_LEFT)
-        bt_left();
-    else if (bt == BT_RIGHT)
-        bt_right();
+    if (bt == BT_SELECT)
+	{
+		g_sw1_pressed = 1;
+	}
+    else
+    {
+    	g_sw1_pressed = 0;
+    }
+
+	lcd.setCursor(15, 0);
+	lcd.print(g_sw1_pressed);
 }
 
 int8_t check_bt_press()
@@ -411,16 +420,7 @@ int8_t check_bt_press()
 
 void handle_bt_press(const int8_t bt)
 {
-	// Debounce
-    if ((millis() - g_bt_delay) > DEBOUNCE_TIME)
-    {
-        if ((bt == BT_NONE) && (g_prev_bt_state != BT_NONE))
-        {
-            bt_released(g_prev_bt_state);
-            g_bt_delay = millis();
-        }
-    }
-    g_prev_bt_state = bt;
+	bt_pressed(bt);
 }
 
 
