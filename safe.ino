@@ -7,6 +7,8 @@ int8_t g_light_is_on = 1;
 int8_t g_prev_bt_state = BT_NONE;
 unsigned long g_bt_delay = 0;
 
+int8_t g_prev_kb_state = BT_NONE;
+unsigned long g_kb_delay = 0;
 int8_t g_wrong_tries = 0;
 int8_t g_safe_is_open = 1;
 int8_t g_pw[4];
@@ -14,6 +16,7 @@ const int8_t g_pw_master[4] = {1,2,3,4};
 int8_t g_pw_try[4];
 int8_t g_pw_try_index = 0;
 int8_t g_safe_is_locked = 0;
+
 
 // Cofre aberto, digite nova senha
 // fechar: senha de 4 digitos + # -> esperar 1s, motor girar 2 voltas no sentido anti-horario no modo meio passo, Cofre fechando
@@ -55,8 +58,6 @@ void setup()
 	lcd.print(F("gite nova senha"));
 }
 
-
-
 void kb_hashtag_pressed()
 {
 
@@ -94,16 +95,6 @@ void kb_hashtag_pressed()
 					g_wrong_tries = 0;
 					open_safe();
 				}
-				/*else
-				{
-					g_wrong_tries++;
-					if (g_wrong_tries == 3)
-					{
-						lock_safe();
-					}
-				}
-				*/
-				
 			}
 		}
 	}
@@ -118,14 +109,14 @@ void sw1_pressed()
 
 void update_pw()
 {
-	int i;
+	int8_t i;
 	for (i=0; i < 4; i++)
 		g_pw[i] = g_pw_try[i];
 }
 
 int8_t pw_is_correct()  // parece q a senha mestre eh so pra travamento, n sei se precisa colocar o teste dela aqui
 {
-	int i;
+	int8_t i;
 	for (i=0; i < 4; i++)
 		if (g_pw_try[i] != g_pw[i])
 			return 0;
@@ -202,11 +193,9 @@ void lock_safe()
 	lcd.print(F("Cofre travado"));
 }
 
-
 void blink_leds()
 {
 }
-
 
 void toggle_light()
 {
@@ -223,10 +212,6 @@ void toggle_light()
     }
 }
 
-
-
-
-
 void check_kb_press()
 {
 	int i;
@@ -240,7 +225,7 @@ void check_kb_press()
 	    pinMode(PIN_MOSI, INPUT);  // C4
 		delay(1);
 
-    
+
 	    if (i == 1)
 		{
 			pinMode(PIN_A1, OUTPUT);
@@ -269,34 +254,31 @@ void check_kb_press()
 			digitalWrite(PIN_MOSI, LOW);
 			delay(1);
 		}
+
 	    
-	    // L1
-	    if (digitalRead(PIN_D3) == LOW)
+	    
+	    if (digitalRead(PIN_D3) == LOW)  // L1
 	    {
 	      handle_kb_press(1, i);
 	      // while (digitalRead(PIN_D3) == LOW);
 	    }
-	 
-	    // L2    
-	    if (digitalRead(PIN_D2) == LOW)
+	    else if (digitalRead(PIN_D2) == LOW)  // L2
 	    {
 	      handle_kb_press(2, i);
 	      // while (digitalRead(PIN_D2) == LOW);
 	    }
-	    
-	    // L3
-	    if (digitalRead(PIN_D1) == LOW)
+	    else if (digitalRead(PIN_D1) == LOW)  // L3
 	    {
 	      handle_kb_press(3, i);
 	      // while (digitalRead(PIN_D1) == LOW);
 	    }
-	    
-	    // L4
-	    if (digitalRead(PIN_D0) == LOW)
+	    else if (digitalRead(PIN_D0) == LOW)  // L4
 	    {
 	      handle_kb_press(4, i);
 	      // while (digitalRead(PIN_D0) == LOW);
 	    }
+	    else
+	    	handle_kb_press(-1, i);
 	}
 	delay(10);
 }
@@ -349,12 +331,23 @@ void handle_kb_press(const int8_t line, const int8_t col)
 		else if (col == 4)
 			dig = -1;
 	}
+	else if (line == -1)
+		dig = BT_NONE;
 
-	
-	if (dig == '#')
-		kb_hashtag_pressed();
-	else if (dig >= 0 && dig <= 9)
-		kb_num_pressed(dig);
+	// Debounce
+	if ((millis() - g_kb_delay) > DEBOUNCE_TIME*4)
+	{
+	    if ((dig == BT_NONE) && (g_prev_kb_state != BT_NONE))
+	    {
+	        if (g_prev_kb_state == '#')
+	        	kb_hashtag_pressed();
+	        else if (g_prev_kb_state >= 0 && g_prev_kb_state <= 9)
+	        	kb_num_pressed(g_prev_kb_state);
+
+	        g_kb_delay = millis();
+	    }
+	}
+	g_prev_kb_state = dig;
 }
 
 
@@ -418,6 +411,7 @@ int8_t check_bt_press()
 
 void handle_bt_press(const int8_t bt)
 {
+	// Debounce
     if ((millis() - g_bt_delay) > DEBOUNCE_TIME)
     {
         if ((bt == BT_NONE) && (g_prev_bt_state != BT_NONE))
@@ -437,6 +431,6 @@ void loop()
 
     check_kb_press();
 
-    // if (g_safe_is_locked)
-    	// blink_leds();
+    if (g_safe_is_locked)
+    	blink_leds();
 }
