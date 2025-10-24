@@ -4,9 +4,6 @@
 LiquidCrystal lcd(PIN_LCD_RS, PIN_LCD_EN, PIN_LCD_D4, PIN_LCD_D5, PIN_LCD_D6, PIN_LCD_D7);
 
 int8_t g_light_is_on = 1;
-int8_t g_prev_bt_state = BT_NONE;
-unsigned long g_bt_delay = 0;
-
 int8_t g_prev_kb_state = BT_NONE;
 unsigned long g_kb_delay = 0;
 int8_t g_wrong_tries = 0;
@@ -17,23 +14,6 @@ int8_t g_pw_try[4];
 int8_t g_pw_try_index = 0;
 int8_t g_safe_is_locked = 0;
 int8_t g_sw1_pressed = 0;
-
-
-// Cofre aberto, digite nova senha
-// fechar: senha de 4 digitos( + # -> esperar 1s, motor girar 2 voltas no sentido anti-horario no modo meio passo, Cofre fechando
-// Cofre fechado
-// senha previamente cadastrada digitada corretamente -> motor girar 2 voltas no sentido horário no modo passo completo, Cofre abrindo
-// Cofre aberto, digite nova senha
-// senha mestra inicializada como 1234 para abrir em caso de travamento
-// cofre fechado e senha digitada incorretamente 3x -> cofre travará
-// Os LEDs da PAT piscando e “Cofre Travado”
-// aberto pressionando USR_SW1 acionada por interrupcao de GPIO.
-// Em seguida a senha mestra devera ser requisitada. A senha mestra so podera ser digitada se a chave USR_SW1 for pressionada
-// Se a senha mestra for digitada corretamente, os 8 LEDs da PAT devem parar de piscar, e, em seguida, o cofre deve ser aberto, indicado pelo LCD como do passo 5.
-//​Utilizar o algoritmo de varredura para realizar a leitura das teclas do teclado matricial.
-// Para colocar um pino em alta impedância atribuir o
-// respectivo bit do GPIO_DIR para entrada.
-// A cada troca de entrada para saída e saída para entrada, esperar no mínimo 1 ms.
 
 
 void setup()
@@ -81,11 +61,13 @@ void kb_hashtag_pressed()
 				}
 				else
 				{
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print(F("Cofre fechado"));
+					
 					g_wrong_tries++;
 					if (g_wrong_tries == 3)
-					{
 						lock_safe();
-					}
 				}				
 			}
 			else
@@ -99,12 +81,6 @@ void kb_hashtag_pressed()
 			}
 		}
 	}
-}
-
-void sw1_pressed()
-{
-	// testar senha apenas qnd sw1 pressionada (???)
-	// testar teclado e  preencher o g_pw_try
 }
 
 void update_pw()
@@ -138,22 +114,16 @@ void kb_num_pressed(int8_t num)
 	{
 		if (!g_safe_is_locked)
 		{
-			lcd.setCursor(15, 1);
+			lcd.setCursor(11+g_pw_try_index, 1);
 			lcd.print(num);
-			
-			lcd.setCursor(14, 1);
-			lcd.print(g_pw_try_index);
 
 			g_pw_try[g_pw_try_index] = num;
 			g_pw_try_index++;
 		}
 		else if (g_sw1_pressed)
 		{
-			lcd.setCursor(15, 1);
+			lcd.setCursor(11+g_pw_try_index, 1);
 			lcd.print(num);
-			
-			lcd.setCursor(14, 1);
-			lcd.print(g_pw_try_index);
 
 			g_pw_try[g_pw_try_index] = num;
 			g_pw_try_index++;
@@ -385,16 +355,12 @@ void bt_select()
 void bt_pressed(int8_t bt)
 {
     if (bt == BT_SELECT)
-	{
 		g_sw1_pressed = 1;
-	}
     else
-    {
     	g_sw1_pressed = 0;
-    }
 
-	lcd.setCursor(15, 0);
-	lcd.print(g_sw1_pressed);
+	// lcd.setCursor(15, 0);
+	// lcd.print(g_sw1_pressed);
 }
 
 int8_t check_bt_press()
