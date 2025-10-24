@@ -268,53 +268,81 @@ void check_kb_press()
 void handle_kb_press(const int8_t line, const int8_t col)
 {
 	char dig;
-	
-	if (line == 1)
+
+	switch (line)
 	{
-		if (col == 1)
+	case (1):
+		switch (col)
+		{
+		case (1):
 			dig = 1;
-		else if (col == 2)
+			break;
+		case (2):
 			dig = 2;
-		else if (col == 3)
+			break;
+		case (3):
 			dig = 3;
-		else if (col == 4)
+			break;
+		case (4):
 			dig = -1;
-	}
-	else if (line == 2)
-	{
-		if (col == 1)
+			break;
+		}
+		break;
+	case (2):
+		switch (col)
+		{
+		case (1):
 			dig = 4;
-		else if (col == 2)
+			break;
+		case (2):
 			dig = 5;
-		else if (col == 3)
+			break;
+		case (3):
 			dig = 6;
-		else if (col == 4)
+			break;
+		case (4):
 			dig = -1;
-	} 
-	else if (line == 3)
-	{
-		if (col == 1)
+			break;
+		}
+		break;
+	case (3):
+		switch (col)
+		{
+		case (1):
 			dig = 7;
-		else if (col == 2)
+			break;
+		case (2):
 			dig = 8;
-		else if (col == 3)
+			break;
+		case (3):
 			dig = 9;
-		else if (col == 4)
+			break;
+		case (4):
 			dig = -1;
-	} 
-	else if (line == 4)
-	{
-		if (col == 1)
+			break;
+		}
+		break;
+	case (4):
+		switch (col)
+		{
+		case (1):
 			dig = -1;
-		else if (col == 2)
+			break;
+		case (2):
 			dig = 0;
-		else if (col == 3)
+			break;
+		case (3):
 			dig = '#';
-		else if (col == 4)
+			break;
+		case (4):
 			dig = -1;
-	}
-	else if (line == -1)
+			break;
+		}
+		break;
+	default:
 		dig = BT_NONE;
+		break;
+	}
 
 	// Debounce
 	if ((millis() - g_kb_delay) > DEBOUNCE_TIME*4)
@@ -332,35 +360,12 @@ void handle_kb_press(const int8_t line, const int8_t col)
 	g_prev_kb_state = dig;
 }
 
-void bt_left()
-{
-}
-
-void bt_right()
-{
-}
-
-void bt_up()
-{
-}
-
-void bt_down()
-{	
-}
-
-void bt_select()
-{
-}
-
 void bt_pressed(int8_t bt)
-{
+{	
     if (bt == BT_SELECT)
 		g_sw1_pressed = 1;
     else
     	g_sw1_pressed = 0;
-
-	// lcd.setCursor(15, 0);
-	// lcd.print(g_sw1_pressed);
 }
 
 int8_t check_bt_press()
