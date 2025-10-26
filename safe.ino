@@ -78,6 +78,12 @@ void kb_hashtag_pressed()
 					g_wrong_tries = 0;
 					open_safe();
 				}
+				else
+				{
+					lcd.clear();
+					lcd.setCursor(0, 0);
+					lcd.print(F("Cofre travado"));
+				}
 			}
 		}
 	}
@@ -99,7 +105,7 @@ int8_t pw_is_correct()  // parece q a senha mestre eh so pra travamento, n sei s
 	return 1;
 }
 
-int8_t pw_master_is_correct()  // parece q a senha mestre eh so pra travamento, n sei se precisa colocar o teste dela aqui
+int8_t pw_master_is_correct()
 {
 	int i;
 	for (i=0; i < 4; i++)
