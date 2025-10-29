@@ -11,11 +11,7 @@
 void PLL_Init(void);
 void SysTick_Init(void);
 void SysTick_Wait1ms(uint32_t delay);
-void SysTick_Wait1us(uint32_t delay);
 void GPIO_Init(void);
-uint32_t PortJ_Input(void);
-void PortN_Output(uint32_t leds);
-void Pisca_leds(void);
 
 int main(void)
 {
@@ -34,10 +30,4 @@ int main(void)
 	}
 }
 
-void Pisca_leds(void)
-{
-	PortN_Output(0x2);
-	SysTick_Wait1ms(250);
-	PortN_Output(0x1);
-	SysTick_Wait1ms(250);
-}
+
