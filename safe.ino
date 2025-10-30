@@ -128,13 +128,16 @@ void kb_num_pressed(int8_t num)
 			g_pw_try[g_pw_try_index] = num;
 			g_pw_try_index++;
 		}
-		else if (g_sw1_pressed)
+		else
 		{
-			lcd.setCursor(11+g_pw_try_index, 1);
-			lcd.print(num);
+			if (g_sw1_pressed)
+			{
+				lcd.setCursor(11+g_pw_try_index, 1);
+				lcd.print(num);
 
-			g_pw_try[g_pw_try_index] = num;
-			g_pw_try_index++;
+				g_pw_try[g_pw_try_index] = num;
+				g_pw_try_index++;
+			}
 		}
 	}
 }
