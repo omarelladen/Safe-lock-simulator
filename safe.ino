@@ -15,6 +15,7 @@ int8_t g_pw_try_index = 0;
 int8_t g_safe_is_locked = 0;
 int8_t g_sw1_pressed = 0;
 
+int64_t g_time = 0;
 
 void setup()
 {
@@ -152,6 +153,7 @@ void open_safe()
 	lcd.print(F("Cofre abrindo"));
 
 	delay(500);
+	g_time += 500;
 	// motor girar 2 voltas no sentido horário no modo passo completo
 
 	lcd.clear();
@@ -170,7 +172,7 @@ void close_safe()
 	lcd.print(F("Cofre fechando"));
 
 	delay(1000);
-	
+	g_time += 1000;
 	// motor girar 2 voltas no sentido anti-horario no modo meio passo
 
 	lcd.clear();	
@@ -274,6 +276,7 @@ void check_kb_press()
 	    	handle_kb_press(-1, i);
 	}
 	delay(10);
+	g_time += 20;
 }
 
 void handle_kb_press(const int8_t line, const int8_t col)
@@ -356,7 +359,7 @@ void handle_kb_press(const int8_t line, const int8_t col)
 	}
 
 	// Debounce
-	if ((millis() - g_kb_delay) > DEBOUNCE_TIME*4)
+	if ((g_time - g_kb_delay) > DEBOUNCE_TIME*4)  // millis()
 	{
 	    if ((dig == BT_NONE) && (g_prev_kb_state != BT_NONE))
 	    {
@@ -365,7 +368,7 @@ void handle_kb_press(const int8_t line, const int8_t col)
 	        else if (g_prev_kb_state >= 0 && g_prev_kb_state <= 9)
 	        	kb_num_pressed(g_prev_kb_state);
 
-	        g_kb_delay = millis();
+	        g_kb_delay = g_time;  // millis()
 	    }
 	}
 	g_prev_kb_state = dig;
