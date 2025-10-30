@@ -74,12 +74,14 @@ void kb_hashtag_pressed()
 			{
 				if (pw_master_is_correct())
 				{
+					g_sw1_pressed = 0;
 					g_safe_is_locked = 0;
 					g_wrong_tries = 0;
 					open_safe();
 				}
 				else
 				{
+					g_sw1_pressed = 0;
 					lcd.clear();
 					lcd.setCursor(0, 0);
 					lcd.print(F("Cofre travado"));
@@ -368,10 +370,11 @@ void handle_kb_press(const int8_t line, const int8_t col)
 
 void bt_pressed(int8_t bt)
 {	
-    if (bt == BT_SELECT)
-		g_sw1_pressed = 1;
-    else
-    	g_sw1_pressed = 0;
+	if (g_safe_is_locked)
+	{
+	    if (bt == BT_SELECT)
+			g_sw1_pressed = 1;
+	}
 }
 
 int8_t check_bt_press()
