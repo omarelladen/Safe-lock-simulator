@@ -8,6 +8,8 @@
 
 #include "tm4c1294ncpdt.h"
 
+void sw1_pressed(void);
+
 #define GPIO_PORTA  (0x0001) //bit 0
 #define GPIO_PORTJ  (0x0100) //bit 8
 #define GPIO_PORTK  (0x200)  //bit 9
@@ -17,18 +19,18 @@
 #define GPIO_PORTQ  (0x4000) //bit 14
 
 // -------------------------------------------------------------------------------
-// Fun√ß√£o GPIO_Init
+// FunÁ„o GPIO_Init
 // Inicializa os ports J e N
-// Par√¢metro de entrada: N√£o tem
-// Par√¢metro de sa√≠da: N√£o tem
+// Par‚metro de entrada: N„o tem
+// Par‚metro de saÌda: N„o tem
 void GPIO_Init(void)
 {
 	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
 	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTQ | GPIO_PORTM | GPIO_PORTL);
-	//1b.   ap√≥s isso verificar no PRGPIO se a porta est√° pronta para uso.
+	//1b.   apÛs isso verificar no PRGPIO se a porta est· pronta para uso.
   while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTQ | GPIO_PORTM | GPIO_PORTL) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTA | GPIO_PORTQ | GPIO_PORTM | GPIO_PORTL) ){};
 	
-	// 2. Limpar o AMSEL para desabilitar a anal√≥gica
+	// 2. Limpar o AMSEL para desabilitar a analÛgica
 	GPIO_PORTJ_AHB_AMSEL_R = 0x00;
 	GPIO_PORTN_AMSEL_R = 0x00;
 	GPIO_PORTQ_AMSEL_R = 0x00;
@@ -44,7 +46,7 @@ void GPIO_Init(void)
 	GPIO_PORTM_PCTL_R = 0x00;
 	GPIO_PORTL_PCTL_R = 0x00;
 
-	// 4. DIR para 0 se for entrada, 1 se for sa√≠da
+	// 4. DIR para 0 se for entrada, 1 se for saÌda
 	GPIO_PORTJ_AHB_DIR_R = 0x00;
 	GPIO_PORTN_DIR_R = 0x03; //BIT0 | BIT1
 	GPIO_PORTA_AHB_DIR_R = 0x0F;
@@ -52,7 +54,7 @@ void GPIO_Init(void)
 	GPIO_PORTM_DIR_R = 0x07;
 	GPIO_PORTL_DIR_R = 0x00;
 		
-	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem fun√ß√£o alternativa	
+	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem funÁ„o alternativa	
 	GPIO_PORTJ_AHB_AFSEL_R = 0x00;
 	GPIO_PORTN_AFSEL_R = 0x00;
 	GPIO_PORTA_AHB_AFSEL_R = 0x00;
@@ -72,35 +74,65 @@ void GPIO_Init(void)
 	GPIO_PORTJ_AHB_PUR_R = 0x03;	//Bit0 e bit1
 	GPIO_PORTL_PUR_R = 0x0F;
 	
+	GPIO_PORTJ_AHB_IEV_R = 0x03;
+	GPIO_PORTJ_AHB_ICR_R = 0x03;
+	GPIO_PORTJ_AHB_IM_R =0x03;
+	
+	NVIC_PRI12_R = 0x03 << 29;
+	NVIC_EN1_R = 0x01 << 19;
 	
 
 }	
 
 // -------------------------------------------------------------------------------
-// Fun√ß√£o PortJ_Input
-// L√™ os valores de entrada do port J
-// Par√¢metro de entrada: N√£o tem
-// Par√¢metro de sa√≠da: o valor da leitura do port
+// FunÁ„o PortJ_Input
+// LÍ os valores de entrada do port J
+// Par‚metro de entrada: N„o tem
+// Par‚metro de saÌda: o valor da leitura do port
 uint32_t PortJ_Input(void)
 {
 	return GPIO_PORTJ_AHB_DATA_R;
 }
 
+uint32_t PortL_Input(void)
+{
+	return GPIO_PORTL_DATA_R;
+}
+
 // -------------------------------------------------------------------------------
-// Fun√ß√£o PortN_Output
+// FunÁ„o PortN_Output
 // Escreve os valores no port N
-// Par√¢metro de entrada: Valor a ser escrito
-// Par√¢metro de sa√≠da: n√£o tem
+// Par‚metro de entrada: Valor a ser escrito
+// Par‚metro de saÌda: n„o tem
 void PortN_Output(uint32_t valor)
 {
     uint32_t temp;
     //vamos zerar somente os bits menos significativos
-    //para uma escrita amig√°vel nos bits 0 e 1
+    //para uma escrita amig·vel nos bits 0 e 1
     temp = GPIO_PORTN_DATA_R & 0xFC;
-    //agora vamos fazer o OR com o valor recebido na fun√ß√£o
+    //agora vamos fazer o OR com o valor recebido na funÁ„o
     temp = temp | valor;
     GPIO_PORTN_DATA_R = temp; 
 }
+
+void PortM_Output(uint32_t valor)
+{
+		uint32_t temp;
+		temp = GPIO_PORTM_DATA_R & 0x0F;
+		temp = temp | valor;
+		GPIO_PORTM_DATA_R = temp;
+	
+}
+
+void GPIOPortJ_Handler()
+{
+        if (GPIO_PORTJ_AHB_RIS_R == 0x01)
+        {
+              GPIO_PORTJ_AHB_ICR_R = 0x01;
+              sw1_pressed();
+      }
+}
+
 
 
 

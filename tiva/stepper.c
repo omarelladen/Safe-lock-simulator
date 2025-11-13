@@ -15,34 +15,40 @@ void Stepper_Init(void) {
     GPIO_PORTH_AHB_DEN_R |= 0x0F;  // Digital enable
 }
 
-void Stepper_StepCW(void) {
-    GPIO_PORTH_AHB_DATA_R = 0x0E; 
-    SysTick_Wait1ms(5);
-    GPIO_PORTH_AHB_DATA_R = 0x0D; 
-    SysTick_Wait1ms(5);
-    GPIO_PORTH_AHB_DATA_R = 0x0B; 
-    SysTick_Wait1ms(5);
-    GPIO_PORTH_AHB_DATA_R = 0x07; 
-    SysTick_Wait1ms(5);
+void Stepper_StepCW(int steps) {
+		GPIO_PORTH_AHB_DATA_R = 0x0F;
+    for (int i = 0; i < steps; i++) {
+        GPIO_PORTH_AHB_DATA_R = 0x07; 
+        SysTick_Wait1ms(5);
+        GPIO_PORTH_AHB_DATA_R = 0x0B; 
+        SysTick_Wait1ms(5);
+        GPIO_PORTH_AHB_DATA_R = 0x0D; 
+        SysTick_Wait1ms(5);
+        GPIO_PORTH_AHB_DATA_R = 0x0E; 
+        SysTick_Wait1ms(5);
+    }
 }
 
-void Stepper_StepCCW_HalfStep(void) {
+void Stepper_StepCCW_HalfStep(int steps) {
+		GPIO_PORTH_AHB_DATA_R = 0x0F;	
+	for (int i = 0; i < steps; i++) {
     GPIO_PORTH_AHB_DATA_R = 0x01;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
     GPIO_PORTH_AHB_DATA_R = 0x03;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
     GPIO_PORTH_AHB_DATA_R = 0x02;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
     GPIO_PORTH_AHB_DATA_R = 0x06;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
     GPIO_PORTH_AHB_DATA_R = 0x04;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
     GPIO_PORTH_AHB_DATA_R = 0x0C;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
     GPIO_PORTH_AHB_DATA_R = 0x08;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
     GPIO_PORTH_AHB_DATA_R = 0x09;
-    SysTick_Wait1ms(5);
+    SysTick_Wait1ms(1);
+		}
 }
 
 

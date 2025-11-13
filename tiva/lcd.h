@@ -17,7 +17,7 @@ void LCD_SendByte(uint8_t byte, uint8_t rs);
 void LCD_Home(void);
 
 // Define o cursor para uma posicao no grid 16x2
-void LCD_SetCursor(uint8_t row, uint8_t col);
+void LCD_SetCursor(uint8_t col, uint8_t row);
 
 // Escreve caracter no display na posicao atual do cursor 
 void LCD_WriteChar(char c);

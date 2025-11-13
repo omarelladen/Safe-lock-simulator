@@ -51,7 +51,7 @@ void kb_hashtag_pressed()
 			update_pw();
 			close_safe();
 		}
-		else  // ou n precisa do # pra abrir?
+		else
 		{
 			if (!g_safe_is_locked)
 			{
@@ -99,7 +99,7 @@ void update_pw()
 		g_pw[i] = g_pw_try[i];
 }
 
-int8_t pw_is_correct()  // parece q a senha mestre eh so pra travamento, n sei se precisa colocar o teste dela aqui
+int8_t pw_is_correct()
 {
 	int8_t i;
 	for (i=0; i < 4; i++)
@@ -123,7 +123,7 @@ void kb_num_pressed(int8_t num)
 	{
 		if (!g_safe_is_locked)
 		{
-			lcd.setCursor(11+g_pw_try_index, 1);
+			lcd.setCursor(11 + g_pw_try_index, 1);
 			lcd.print(num);
 
 			g_pw_try[g_pw_try_index] = num;
@@ -133,7 +133,7 @@ void kb_num_pressed(int8_t num)
 		{
 			if (g_sw1_pressed)
 			{
-				lcd.setCursor(11+g_pw_try_index, 1);
+				lcd.setCursor(11 + g_pw_try_index, 1);
 				lcd.print(num);
 
 				g_pw_try[g_pw_try_index] = num;
@@ -154,6 +154,7 @@ void open_safe()
 
 	delay(500);
 	g_time += 500;
+
 	// motor girar 2 voltas no sentido horário no modo passo completo
 
 	lcd.clear();
@@ -173,6 +174,7 @@ void close_safe()
 
 	delay(1000);
 	g_time += 1000;
+
 	// motor girar 2 voltas no sentido anti-horario no modo meio passo
 
 	lcd.clear();	
@@ -191,21 +193,6 @@ void lock_safe()
 
 void blink_leds()
 {
-}
-
-void toggle_light()
-{
-    if (g_light_is_on)
-    {
-        pinMode(PIN_LCD_LIGHT, OUTPUT);
-        digitalWrite(PIN_LCD_LIGHT, LOW);
-        g_light_is_on = 0;
-    }
-    else
-    {
-        pinMode(PIN_LCD_LIGHT, INPUT);
-        g_light_is_on = 1;
-    }
 }
 
 void check_kb_press()

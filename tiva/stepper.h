@@ -7,10 +7,10 @@
 void Stepper_Init(void);
 
 // Move o motor 1 passo no sentido horário
-void Stepper_StepCW(void);
+void Stepper_StepCW(int steps);
 
 // Move o motor 1 passo no sentido anti-horário
-void Stepper_StepCCW(void);
+void Stepper_StepCCW_HalfStep(int steps);
 
 // Gira o motor 'n' passos em um sentido específico
 void Stepper_Rotate(uint32_t steps, uint8_t direction);

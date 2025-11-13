@@ -36,9 +36,9 @@ void LCD_Home(void){
     SysTick_Wait1ms(5);
 }
 
-void LCD_SetCursor(uint8_t row, uint8_t col){
-    uint8_t address = (row == 0) ? 0x00 : 0x40;
-    address += col;
+void LCD_SetCursor(uint8_t col, uint8_t row){
+    uint8_t address = (col == 0) ? 0x00 : 0x40;
+    address += row;
     LCD_SendByte(0x80 | address,0);
 }
 
